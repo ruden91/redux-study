@@ -10,8 +10,10 @@ export default class Counter extends Component {
   }
 
   handleIncrement = () => {
-    this.setState({
-      count: this.state.count + 1
+    this.setState((prevState, b) => {
+      return {
+        count: prevState.count + 1
+      }
     })
   }
 
@@ -26,12 +28,15 @@ export default class Counter extends Component {
       count: 0
     })
   }
-  
+  get hello() {
+    return 'hello';
+  }
   render() {
     const { count } = this.state;
 
     return (
       <section className="counter">
+        <p>{ this.hello }</p>
         <h1>{ count }</h1>    
         <button onClick={ this.handleIncrement } >Increment</button>
         <button onClick={ this.handleDecrement } >Decrement</button>
