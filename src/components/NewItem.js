@@ -20,6 +20,9 @@ class NewItem extends Component {
     // Do something when a new value is submitted.
     onSubmit(value)
     // Reset the state of the component.
+    this.setState({
+      value: ''
+    })
   };
 
   render() {

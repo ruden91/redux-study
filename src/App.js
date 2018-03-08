@@ -28,10 +28,15 @@ export default class App extends Component {
   }
 
   onSubmit = (value) => {
-    let items = this.state.items.concat({ value: value, id: uniqueId(), packed: false })
+    const { items } = this.state;
+    let item = {
+      value,
+      id: uniqueId(),
+      packed: false
+    }
 
     this.setState({
-      items
+      items: [item, ...items]
     })
   }
 
