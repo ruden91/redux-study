@@ -1,102 +1,62 @@
 import React, { Component } from 'react';
 
-import CountDown from './components/CountDown';
-import NewItem from './components/NewItem';
-import Items from './components/Items';
-import { uniqueId, filter, remove, map } from 'lodash';
-const defaultState = [
-  { value: 'Pants', id: uniqueId(), packed: false },
-  { value: 'Jacket', id: uniqueId(), packed: false },
-  { value: 'iPhone Charger', id: uniqueId(), packed: false },
-  { value: 'MacBook', id: uniqueId(), packed: false },
-  { value: 'Sleeping Pills', id: uniqueId(), packed: true },
-  { value: 'Underwear', id: uniqueId(), packed: false },
-  { value: 'Hat', id: uniqueId(), packed: false },
-  { value: 'T-Shirts', id: uniqueId(), packed: false },
-  { value: 'Belt', id: uniqueId(), packed: false },
-  { value: 'Passport', id: uniqueId(), packed: true },
-  { value: 'Sandwich', id: uniqueId(), packed: true },
-];
+import Store from './store';
+import * as actions from './actions';
 
-export default class App extends Component {
-  constructor() {
-    super();
-
-    this.state = {
-      items: []
-    }
-  }
-
-  onSubmit = (value) => {
-    const { items } = this.state;
-    let item = {
-      value,
-      id: uniqueId(),
-      packed: false
-    }
-
-    this.setState({
-      items: [item, ...items]
-    })
-  }
-
-  handleCheckButton = (selectedItem) => {
-    let items = map(this.state.items, (item) => {
-      if (item.id === selectedItem.id) {
-        item.packed = !item.packed
-      }
-      return item;
-    })
-    
-    this.setState({
-      items
-    })
-  }
-
-  handleRemoveButton = (selectedItem) => {
-    let items = remove(this.state.items, (item) => item.id !== selectedItem.id);
-
-    this.setState({
-      items
-    })
-  }
-
-  clearUnpackedButton = () => {
-    let items = map(this.state.items, (item) => {
-      item.packed = false;
-      return item;
-    })
-
-    this.setState({
-      items
-    })
-  }
-
-  componentDidMount() {
-    this.setState({
-      items: defaultState
-    })
+class Caculator extends Component {
+  constructor(props) {
+    super(props);
   }
 
   render() {
-    const { items } = this.state;
+    const { numberOfPeople, slicesPerPerson } = this.props;
+    const { onReset, updateNumberOfPeople, updateSlicesPerPerson } = this.props;
     return (
-      <div className="app">
-        <NewItem onSubmit={ this.onSubmit }/>
-        <CountDown />
-        <Items 
-          title="Unpacked Items" 
-          items={ filter(items, item => !item.packed) } 
-          handleCheckButton={ this.handleCheckButton }
-          handleRemoveButton={ this.handleRemoveButton }
+      <div className="app-caculator">
+        <input type="number" value={ numberOfPeople } onChange={ updateNumberOfPeople } />
+        <input type="number" value={ slicesPerPerson } onChange={ updateSlicesPerPerson } />
+        <button onClick={ onReset }>reset button</button>
+      </div>
+    )
+  }
+}
+
+export default class App extends Component {
+  state = Store.getState();
+
+  updateNumberOfPeople = (e) => {
+    actions.updateNumberOfPeople(parseInt(e.target.value || 0));
+  }
+
+  updateSlicesPerPerson = (e) => {
+    actions.updateSlicesPerPerson(parseInt(e.target.value || 0));
+  }
+
+  onReset = () => {
+    actions.reset();
+  }
+
+  updateState = () => {
+    this.setState(Store.getState());
+  }
+
+  componentDidMount() {
+    Store.on('change', this.updateState);
+  }
+
+  componentWillUnmount() {
+    Store.off('change', this.updateState);
+  }
+
+  render() { 
+    return (
+      <div>
+        <Caculator 
+          { ...this.state }
+          updateNumberOfPeople={ this.updateNumberOfPeople }
+          updateSlicesPerPerson={ this.updateSlicesPerPerson }
+          onReset={ this.onReset }
         />
-        <Items 
-          title="Packed Items" 
-          items={ filter(items, item => item.packed) } 
-          handleCheckButton={ this.handleCheckButton }
-          handleRemoveButton={ this.handleRemoveButton }          
-        />
-        <button className="button full-width" onClick={ this.clearUnpackedButton }>Mark All As Unpacked</button>      
       </div>
     )
   }
